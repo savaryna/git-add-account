@@ -1,6 +1,6 @@
 {
   "name": "@savaryna/git-add-account",
-  "version": "0.0.1-beta",
+  "version": "0.0.1-beta.1",
   "description": "🔐 A small CLI app that allows you to easily add multiple GIT accounts on one machine.",
   "homepage": "https://github.com/savaryna/git-add-account#readme",
   "keywords": [

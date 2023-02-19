@@ -1,0 +1,46 @@
+{
+  "name": "@savaryna/git-add-account",
+  "version": "0.0.1-beta",
+  "description": "Easily add multiple GIT accounts.",
+  "homepage": "https://github.com/savaryna/git-add-account#readme",
+  "keywords": [
+    "add",
+    "multiple",
+    "git",
+    "account",
+    "accounts",
+    "on",
+    "one",
+    "machine",
+    "ssh",
+    "verified",
+    "commit"
+  ],
+  "author": "Alex Tofan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/savaryna/git-add-account/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/savaryna/git-add-account.git"
+  },
+  "bin": {
+    "gac": "index.js",
+    "git-add-account": "index.js"
+  },
+  "main": "index.js",
+  "module": "main.js",
+  "os": [
+    "darwin"
+  ],
+  "dependencies": {
+    "esm": "^3.2.25",
+    "prompts": "^2.4.2",
+    "zod": "^3.20.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.0",
+    "@types/prompts": "^2.4.2"
+  }
+}

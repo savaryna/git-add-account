@@ -2,7 +2,8 @@
 
 🔐 A small CLI app that allows you to easily add multiple GIT accounts on one machine.
 
-> 🚨 **Warning**: This version was tested to work on MacOS only.
+> **Warning**
+> , this version was tested to work on MacOS only!
 
 ## Usage
 

@@ -1,20 +1,27 @@
 {
   "name": "@savaryna/git-add-account",
   "version": "0.0.1-beta.2",
-  "description": "🔐 A small CLI app that allows you to easily add multiple GIT accounts on one machine.",
+  "description": "🔐 A small CLI app that allows you to easily add multiple GIT accounts on one machine. It switches between accounts automatically.",
   "homepage": "https://github.com/savaryna/git-add-account#readme",
   "keywords": [
     "add",
     "multiple",
     "git",
+    "github",
     "account",
     "accounts",
+    "users",
     "on",
     "one",
     "machine",
+    "mac",
+    "linux",
+    "windows",
     "ssh",
     "verified",
-    "commit"
+    "commit",
+    "auto",
+    "switch"
   ],
   "author": "Alex Tofan",
   "license": "MIT",
@@ -31,9 +38,6 @@
     "git-add-account": "index.js"
   },
   "main": "index.js",
-  "os": [
-    "darwin"
-  ],
   "dependencies": {
     "prompts": "^2.4.2",
     "zod": "^3.20.6"

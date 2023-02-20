@@ -34,7 +34,7 @@
   },
   "type": "commonjs",
   "bin": {
-    "gac": "index.js",
+    "gaa": "index.js",
     "git-add-account": "index.js"
   },
   "main": "index.js",

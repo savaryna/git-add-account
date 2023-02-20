@@ -1,7 +1,7 @@
-import exec from './exec.js';
+const { default: exec } = require('./exec');
 
-export const fileExists = (file) =>
-  exec(`ls ${file}`).then(
+module.exports.fileExists = (path) =>
+  exec(`ls ${path}`).then(
     () => true,
     () => false
   );

@@ -2,7 +2,7 @@ const prompts = require('prompts');
 
 const exit = (code = 0, reason = null) => {
   console.log(reason ? `\n${reason}\n` : '');
-  console.log(`${code ? '😵 Exited.' : '✨ Done.'} Thanks for using git-add-account!\n`);
+  console.log(`${code ? '😵 Exited.' : '✨ Done.'} Thanks for using @savaryna/git-add-account!\n`);
   process.exit(code);
 };
 

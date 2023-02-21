@@ -117,19 +117,21 @@ async function main() {
   // Set default ssh command
   await exec(`git config --file ${workspaceGitConfigPath} core.sshCommand "ssh -i ${sshKeyPath}"`);
 
-  const { enableSignedCommits } = await prompts({
+  const { signYourWork } = await prompts({
     type: 'toggle',
-    name: 'enableSignedCommits',
-    message: 'Enable signed commits for this account?',
+    name: 'signYourWork',
+    message: 'Do you want to sign your work?',
     initial: true,
     active: 'yes',
     inactive: 'no',
   });
 
-  // Enable signed commits
-  if (enableSignedCommits) {
+  // Enable signing
+  if (signYourWork) {
     await exec(`git config --file ${workspaceGitConfigPath} gpg.format ssh`);
     await exec(`git config --file ${workspaceGitConfigPath} commit.gpgsign true`);
+    await exec(`git config --file ${workspaceGitConfigPath} push.gpgsign if-asked`);
+    await exec(`git config --file ${workspaceGitConfigPath} tag.gpgsign true`);
     await exec(`git config --file ${workspaceGitConfigPath} user.signingkey ${sshKeyPath}`);
   }
 

@@ -1,19 +1,19 @@
-const { access, appendFile, constants, mkdir, readFile, unlink, writeFile } = require('fs');
-const { homedir } = require('os');
+const { access, constants, mkdir, readFile, rm, writeFile } = require('fs');
+const { homedir, platform } = require('os');
 const { promisify } = require('util');
 const { resolve } = require('path');
 
-module.exports.append = promisify(appendFile);
-
-module.exports.createEmptyFile = (path) => promisify(writeFile)(path, '');
-
-module.exports.home = homedir();
-
-module.exports.mkdir = promisify(mkdir);
+module.exports.createFile = (path, data) => promisify(writeFile)(path, data, 'utf8');
 
 module.exports.readFile = promisify(readFile);
 
-module.exports.remove = promisify(unlink);
+module.exports.home = homedir();
+
+module.exports.platform = platform();
+
+module.exports.mkdir = promisify(mkdir);
+
+module.exports.remove = (path) => promisify(rm)(path, { recursive: true, force: true });
 
 module.exports.resolve = resolve;
 

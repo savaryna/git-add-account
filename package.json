@@ -33,6 +33,9 @@
     "url": "git+https://github.com/savaryna/git-add-account.git"
   },
   "type": "commonjs",
+  "files":[
+    "helpers"
+  ],
   "bin": {
     "gaa": "index.js",
     "git-add-account": "index.js"

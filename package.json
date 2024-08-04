@@ -1,6 +1,6 @@
 {
   "name": "@savaryna/git-add-account",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "🔐 A small CLI app that allows you to easily add multiple GIT accounts on one machine. It switches between accounts automatically based on the workspace (directory) you are in.",
   "homepage": "https://github.com/savaryna/git-add-account#readme",
   "keywords": [
@@ -33,6 +33,9 @@
     "url": "git+https://github.com/savaryna/git-add-account.git"
   },
   "type": "commonjs",
+  "files": [
+    "helpers"
+  ],
   "bin": {
     "gaa": "index.js",
     "git-add-account": "index.js"

@@ -1,149 +1,85 @@
 #!/usr/bin/env node
 
 const { default: exec } = require('./helpers/exec');
-const { append, createEmptyFile, hasReadWriteAccess, home, mkdir, readFile, remove, resolve } = require('./helpers/file');
-const { default: prompts, exit } = require('./helpers/prompts');
-const { default: validate, z } = require('./helpers/validate');
-
-const sshDirPath = resolve(home, '.ssh');
-const sshConfigPath = resolve(sshDirPath, 'config');
-
-const overwriteFilePrompt = (path) =>
-  prompts({
-    type: 'toggle',
-    name: 'overwrite',
-    message: `File ${path} already exists. Overwrite?`,
-    initial: false,
-    active: 'yes',
-    inactive: 'no',
-  });
+const { createFile, hasReadWriteAccess, platform, mkdir, readFile, remove } = require('./helpers/file');
+const { default: prompts, overwritePathPrompt, exit } = require('./helpers/prompts');
 
 async function main() {
-  const { name, email, workspace } = await prompts([
-    {
-      type: 'text',
-      name: 'name',
-      message: 'Name to use for this account:',
-      validate: validate(z.string()),
-      format: (value) => ({
-        original: value,
-        camel: value.toLowerCase().replace(/[^\w]/g, '_'),
-      }),
-    },
-    {
-      type: 'text',
-      name: 'email',
-      message: 'Email to use for this account:',
-      validate: validate(z.string().email()),
-      format: (value) => ({
-        address: value,
-        domain: value.match(/(?<=@).+(?=\.)/)[0].replace(/[^\w]/g, '_'),
-      }),
-    },
-    {
-      type: 'text',
-      name: 'workspace',
-      message: 'Workspace to use for this account:',
-      initial: (email) => resolve(home, `code/${email.domain}`),
-      validate: validate(z.string()),
-    },
-  ]);
+  const { name, email, host, workspace, signYourWork } = await prompts();
 
-  const workspaceGitConfigPath = resolve(workspace, '.gitconfig');
-
-  if (await hasReadWriteAccess(workspaceGitConfigPath)) {
-    const { overwrite } = await overwriteFilePrompt(workspaceGitConfigPath);
+  // Check already existing workspace config
+  if (await hasReadWriteAccess(workspace.config)) {
+    const { overwrite } = await overwritePathPrompt(workspace.config);
 
     if (overwrite) {
-      await remove(workspaceGitConfigPath);
+      await remove(workspace.config);
     } else {
       exit(1);
     }
   }
 
-  const { sshKeyFileName } = await prompts([
-    {
-      type: 'text',
-      name: 'sshKeyFileName',
-      message: 'Name to use for SSH keys:',
-      initial: `${email.domain}_${name.camel}`,
-      validate: validate(z.string()),
-      format: (value) => `git_${value}`,
-    },
-  ]);
-
-  const sshKeyPath = resolve(sshDirPath, sshKeyFileName);
-
-  if (await hasReadWriteAccess(sshKeyPath)) {
-    const { overwrite } = await overwriteFilePrompt(sshKeyPath);
-
-    if (overwrite) {
-      await remove(sshKeyPath);
-    } else {
-      exit(1);
-    }
-  }
+  // Create workspace/config dir
+  await mkdir(workspace.config, { recursive: true });
 
   // Generate ssh key
-  await exec(`ssh-keygen -t ed25519 -C "${email.address}" -f ${sshKeyPath}`);
+  await exec(`ssh-keygen -t ed25519 -C "${email}" -f ${workspace.privateKey}`);
 
-  // Check to see if the user entered a passphrase
-  const hasPassphrase = await exec(`ssh-keygen -y -P "" -f ${sshKeyPath}`).then(
-    () => false,
-    () => true
-  );
+  // Use keychain if the system is MacOS and a passphrase was used
+  const useKeychain = await exec(`ssh-keygen -y -P "" -f ${workspace.privateKey}`)
+    .then(
+      () => false,
+      () => true
+    )
+    .then((hasPassphrase) => hasPassphrase && platform === 'darwin');
 
+  // Create sshconfig for the workspace
   const sshConfig = `
-    # Config for GIT account ${email.address}
-    Host *
+    # Config for GIT account ${email}
+    Host ${host.value}
+      HostName ${host.value}
+      User git
       AddKeysToAgent yes
-      ${hasPassphrase ? 'UseKeychain yes' : ''}
-      IdentityFile ${sshKeyPath}
+      ${useKeychain ? 'UseKeychain yes' : ''}
+      IdentitiesOnly yes
+      IdentityFile ${workspace.privateKey}
   `.replace(/\n\s{4}/g, '\n');
 
-  // Add account to the ssh config
-  await append(sshConfigPath, sshConfig);
+  await createFile(workspace.sshConfig, sshConfig);
 
-  // Create workspace dir if it does not exist
-  await mkdir(workspace, { recursive: true });
+  // Create gitconfig for the workspace
+  const gitConfig = `
+    [user]
+      name = ${name.value}
+      email = ${email}
+    [core]
+      sshCommand = ssh -F ${workspace.sshConfig}
+    ${
+      !signYourWork
+        ? ''
+        : `
+    [gpg]
+      format = ssh
+    [commit]
+      gpgsign = true
+    [push]
+      gpgsign = if-asked
+    [tag]
+      gpgsign = true
+    [user]
+      signingkey = ${workspace.privateKey}
+    `
+    }
+  `.replace(/\n\s{4}/g, '\n');
 
-  // Create .gitconfig for the workspace
-  await createEmptyFile(workspaceGitConfigPath);
-
-  // Set user details
-  await exec(`git config --file ${workspaceGitConfigPath} user.name "${name.original}"`);
-  await exec(`git config --file ${workspaceGitConfigPath} user.email "${email.address}"`);
-
-  // Set default ssh command
-  await exec(`git config --file ${workspaceGitConfigPath} core.sshCommand "ssh -i ${sshKeyPath}"`);
-
-  const { signYourWork } = await prompts({
-    type: 'toggle',
-    name: 'signYourWork',
-    message: 'Do you want to sign your work?',
-    initial: true,
-    active: 'yes',
-    inactive: 'no',
-  });
-
-  // Enable signing
-  if (signYourWork) {
-    await exec(`git config --file ${workspaceGitConfigPath} gpg.format ssh`);
-    await exec(`git config --file ${workspaceGitConfigPath} commit.gpgsign true`);
-    await exec(`git config --file ${workspaceGitConfigPath} push.gpgsign if-asked`);
-    await exec(`git config --file ${workspaceGitConfigPath} tag.gpgsign true`);
-    await exec(`git config --file ${workspaceGitConfigPath} user.signingkey ${sshKeyPath}`);
-  }
+  await createFile(workspace.gitConfig, gitConfig);
 
   // Include workspace config in the global config
-  await exec(`git config --global includeIf.gitdir:${workspace}/.path ${workspaceGitConfigPath}`);
+  await exec(`git config --global includeIf.gitdir:${workspace.root}/.path ${workspace.gitConfig}`);
 
-  const publicSshKeyPath = resolve(sshDirPath, `${sshKeyFileName}.pub`);
-  // await exec(`pbcopy < ${publicSshKeyPath}`);
-  const publicSshKey = await readFile(publicSshKeyPath).then((buffer) => buffer.toString().trim());
+  const publicKey = await readFile(workspace.publicKey).then((buffer) => buffer.toString().trim());
 
-  console.log('\nYour public SSH key is: ', publicSshKey);
-  console.log('You can also find it here: ', publicSshKeyPath);
+  console.log('\nYour public SSH key is: ', publicKey);
+  console.log('You can also find it here: ', workspace.publicKey);
   console.log('Add it to your favorite GIT provider and enjoy!');
 }
 

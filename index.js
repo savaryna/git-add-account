@@ -48,6 +48,7 @@ async function main() {
 
   // Create gitconfig for the workspace
   const gitConfig = `
+    # Config for GIT account ${email}
     [user]
       name = ${name.value}
       email = ${email}

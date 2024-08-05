@@ -1,22 +1,45 @@
-const { default: exec } = require('./exec');
-const { home, resolve } = require('./file');
-const { default: validate, z } = require('./validate');
-const defaultPrompts = require('prompts');
+import { PathLike } from 'fs';
+import exec from './exec';
+import { home, resolve } from './file';
+import validate, { z } from './validate';
+import defaultPrompts from 'prompts';
 
-const MIN_GIT_VERSION = '2.34.0'; // Lower versions don't support SSH for GPG signing
+type Name = {
+  value: string;
+  camel: string;
+};
 
-const getGitVersion = () => exec('git --version').then(({ stdout }) => stdout.split(' ')[2]);
+type Host = {
+  value: string;
+  camel: string;
+};
 
-const exit = (code = 0, reason = null) => {
+type Workspace = {
+  root: string;
+  config: string;
+  gitConfig: string;
+  sshConfig: string;
+  privateKey: string;
+  publicKey: string;
+};
+
+export const MIN_GIT_VERSION = '2.34.0'; // Lower versions don't support SSH for GPG signing
+
+export const getGitVersion = () => exec('git --version').then(({ stdout }) => stdout.split(' ')[2]);
+
+export const exit = (code = 0, reason = null) => {
   console.log(reason ? `\n${reason}\n` : '');
   console.log(`${code ? '😵 Exited.' : '✨ Done.'} Thanks for using @savaryna/git-add-account!\n`);
   process.exit(code);
 };
 
 // Add onCancel handler for all prompts
-const prompts = (questions, options) => defaultPrompts(questions, { onCancel: () => exit(1), ...options });
+export const prompts = <T extends string = string>(
+  questions: defaultPrompts.PromptObject<T> | Array<defaultPrompts.PromptObject<T>>,
+  options?: defaultPrompts.Options
+) => defaultPrompts(questions, { onCancel: () => exit(1), ...options });
 
-const overwritePathPrompt = (path) =>
+export const overwritePathPrompt = (path: PathLike) =>
   prompts({
     type: 'toggle',
     name: 'overwrite',
@@ -24,16 +47,20 @@ const overwritePathPrompt = (path) =>
     initial: false,
     active: 'yes',
     inactive: 'no',
-  });
+  }) as Promise<{
+    overwrite: boolean;
+  }>;
 
-const cliPrompts = () =>
-  prompts([
+export default async () => {
+  const gitVersion = await getGitVersion();
+
+  return prompts([
     {
       type: 'text',
       name: 'name',
       message: 'Your name:',
       validate: validate(z.string()),
-      format: (value) => ({
+      format: (value): Name => ({
         value,
         camel: value.toLowerCase().replace(/[^\w]/g, '_'),
       }),
@@ -55,7 +82,7 @@ const cliPrompts = () =>
           .transform((h) => 'https://' + h)
           .refine(URL.canParse, { message: 'Invalid host' })
       ),
-      format: (value) => ({
+      format: (value): Host => ({
         value,
         camel: value.replace(/[^\w]/g, '_'),
       }),
@@ -64,10 +91,10 @@ const cliPrompts = () =>
       type: 'text',
       name: 'workspace',
       message: 'Workspace to use for this account:',
-      initial: (host) => resolve(home, 'code', host.camel),
+      initial: (host) => resolve(home(), 'code', host.camel),
       validate: validate(z.string().refine((value) => !value.startsWith('~'), { message: '"~" is not supported' })),
-      format: (value, { host }) => {
-        const root = resolve(home, value);
+      format: (value, { host }): Workspace => {
+        const root = resolve(home(), value);
         const config = resolve(root, '.config');
         const sshKeyFileName = `id_ed25519_git_${host.camel}`;
 
@@ -90,21 +117,19 @@ const cliPrompts = () =>
       inactive: 'no',
     },
     {
-      type: async (prev) => {
-        this.gitVersion = await getGitVersion();
-        return prev && this.gitVersion < MIN_GIT_VERSION ? 'toggle' : null;
-      },
+      type: (prev) => (prev && gitVersion < MIN_GIT_VERSION ? 'toggle' : null),
       name: 'signYourWork',
-      message: () => `Your current git version (${this.gitVersion}) does not support SSH signing. Continue without?`,
       initial: true,
+      message: `Your current git version (${gitVersion}) does not support SSH signing. Continue without?`,
       active: 'yes',
       inactive: 'no',
       format: (value) => (value ? !value : exit(1)),
     },
-  ]);
-
-module.exports.exit = exit;
-
-module.exports.overwritePathPrompt = overwritePathPrompt;
-
-module.exports.default = cliPrompts;
+  ]) as Promise<{
+    name: Name;
+    email: string;
+    host: Host;
+    workspace: Workspace;
+    signYourWork: boolean;
+  }>;
+};

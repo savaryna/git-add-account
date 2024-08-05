@@ -1,24 +1,16 @@
-const { access, constants, mkdir, readFile, rm, writeFile } = require('fs');
-const { homedir, platform } = require('os');
-const { promisify } = require('util');
-const { resolve } = require('path');
+import { PathLike } from 'fs';
+import { access, constants, mkdir, readFile, rm, writeFile } from 'fs/promises';
+import { homedir, platform } from 'os';
+import { resolve } from 'path';
 
-module.exports.createFile = (path, data) => promisify(writeFile)(path, data, 'utf8');
+export const createFile = (path: PathLike, data: string) => writeFile(path, data, 'utf8');
 
-module.exports.readFile = promisify(readFile);
+export const remove = (path: PathLike) => rm(path, { recursive: true, force: true });
 
-module.exports.home = homedir();
-
-module.exports.platform = platform();
-
-module.exports.mkdir = promisify(mkdir);
-
-module.exports.remove = (path) => promisify(rm)(path, { recursive: true, force: true });
-
-module.exports.resolve = resolve;
-
-module.exports.hasReadWriteAccess = (path) =>
-  promisify(access)(path, constants.R_OK | constants.W_OK).then(
+export const hasReadWriteAccess = (path: PathLike) =>
+  access(path, constants.R_OK | constants.W_OK).then(
     () => true,
     () => false
   );
+
+export { readFile, homedir as home, platform, mkdir, resolve };

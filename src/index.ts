@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const { default: exec } = require('./helpers/exec');
-const { createFile, hasReadWriteAccess, platform, mkdir, readFile, remove } = require('./helpers/file');
-const { default: prompts, overwritePathPrompt, exit } = require('./helpers/prompts');
+import exec from './helpers/exec';
+import { createFile, hasReadWriteAccess, platform, mkdir, readFile, remove } from './helpers/file';
+import prompts, { overwritePathPrompt, exit } from './helpers/prompts';
 
 async function main() {
   const { name, email, host, workspace, signYourWork } = await prompts();
@@ -30,7 +30,7 @@ async function main() {
       () => false,
       () => true
     )
-    .then((hasPassphrase) => hasPassphrase && platform === 'darwin');
+    .then((hasPassphrase) => hasPassphrase && platform() === 'darwin');
 
   // Create sshconfig for the workspace
   const sshConfig = `
@@ -42,7 +42,9 @@ async function main() {
       ${useKeychain ? 'UseKeychain yes' : ''}
       IdentitiesOnly yes
       IdentityFile ${workspace.privateKey}
-  `.replace(/\n\s{4}/g, '\n');
+  `
+    .replace(/\n\s{4}/g, '\n')
+    .concat('\n');
 
   await createFile(workspace.sshConfig, sshConfig);
 
@@ -70,7 +72,9 @@ async function main() {
       signingkey = ${workspace.privateKey}
     `
     }
-  `.replace(/\n\s{4}/g, '\n');
+  `
+    .replace(/\n\s{4}/g, '\n')
+    .concat('\n');
 
   await createFile(workspace.gitConfig, gitConfig);
 
@@ -79,8 +83,8 @@ async function main() {
 
   const publicKey = await readFile(workspace.publicKey).then((buffer) => buffer.toString().trim());
 
-  console.log('\nYour public SSH key is: ', publicKey);
-  console.log('You can also find it here: ', workspace.publicKey);
+  console.log('\nYour public SSH key is:\n', publicKey);
+  console.log('You can also find it here:\n', workspace.publicKey);
   console.log('Add it to your favorite GIT provider and enjoy!');
 }
 

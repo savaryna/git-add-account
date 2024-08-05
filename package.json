@@ -47,7 +47,7 @@
     "pretest": "npm run build",
     "test": "npm publish --dry-run"
   },
-  "source": "index.js",
+  "source": "src/index.ts",
   "main": "bin/main.js",
   "dependencies": {
     "prompts": "^2.4.2",

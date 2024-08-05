@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig(({ watch }) => {
   return {
     entry: {
-      main: 'index.js',
+      main: 'src/index.ts',
     },
     outDir: 'bin',
     minify: true,

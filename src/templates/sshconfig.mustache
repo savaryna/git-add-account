@@ -1,0 +1,8 @@
+# Config for GIT account {{{email}}}
+Host {{{host.value}}}
+    HostName {{{host.value}}}
+    User git
+    AddKeysToAgent yes{{#useKeychain}}
+    UseKeychain yes{{/useKeychain}}
+    IdentitiesOnly yes
+    IdentityFile {{{workspace.privateKey}}}

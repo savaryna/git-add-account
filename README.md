@@ -44,8 +44,8 @@ After going through all the steps, you will be presented with your public SSH ke
 
 A simple way to use multiple git accounts on one machine is to use different SSH configs based on the directory you are in. The way [@savaryna/add-git-account](https://www.npmjs.com/package/@savaryna/git-add-account) works is, it asks you for some basic information and then it creates some files under `.config` in the workspace directory you specified. Ex:
 
-1. It creates a _(private/public)_ SSH keypair using `ssh-keygen -t ed25519 -C "john@github.com" -f /Users/john/code/work/.config/id_ed25519_git_github_com`. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L24-L25).
-1. It creates a `sshconfig` file. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L35-L49).
+1. It creates a _(private/public)_ SSH keypair using `ssh-keygen -t ed25519 -C "john@github.com" -f /Users/john/code/work/.config/id_ed25519_git_github_com`. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L29-L30).
+1. It creates a `sshconfig` file. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L40-L48).
 
    ```ini
    # File at /Users/john/code/work/.config/sshconfig
@@ -59,7 +59,7 @@ A simple way to use multiple git accounts on one machine is to use different SSH
      IdentityFile /Users/john/code/work/.config/id_ed25519_git_github_com
    ```
 
-1. It creates a `gitconfig` file. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L51-L79).
+1. It creates a `gitconfig` file. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L50-L58).
 
    ```ini
    # File at /Users/john/code/work/.config/gitconfig
@@ -81,7 +81,7 @@ A simple way to use multiple git accounts on one machine is to use different SSH
      signingkey = /Users/john/code/work/.config/id_ed25519_git_github_com
    ```
 
-1. It runs `git config --global includeIf.gitdir:/Users/john/code/work/.path /Users/john/code/work/.config/gitconfig`, this makes sure that as long as you are in the workspace created earlier, **or any other subdirectory**, git will use the config from step **3** automatically[^3]. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L81-L82).
+1. It runs `git config --global includeIf.gitdir:/Users/john/code/work/.path /Users/john/code/work/.config/gitconfig`, this makes sure that as long as you are in the workspace created earlier, **or any other subdirectory**, git will use the config from step **3** automatically[^3]. [See code](https://github.com/savaryna/git-add-account/blob/main/src/index.ts#L60-L61).
 1. And finally, it presents you with your public SSH key so you can copy it and add it to your GIT provider of choice.
 
 ## License

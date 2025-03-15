@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+import mustache from 'mustache';
+
+import sshConfigTemplate from './templates/sshconfig.mustache';
+import gitConfigTemplate from './templates/gitconfig.mustache';
+
 import exec from './helpers/exec';
 import { createFile, hasReadWriteAccess, platform, mkdir, readFile, remove } from './helpers/file';
 import prompts, { overwritePathPrompt, exit } from './helpers/prompts';
@@ -33,48 +38,22 @@ async function main() {
     .then((hasPassphrase) => hasPassphrase && platform() === 'darwin');
 
   // Create sshconfig for the workspace
-  const sshConfig = `
-    # Config for GIT account ${email}
-    Host ${host.value}
-      HostName ${host.value}
-      User git
-      AddKeysToAgent yes
-      ${useKeychain ? 'UseKeychain yes' : ''}
-      IdentitiesOnly yes
-      IdentityFile ${workspace.privateKey}
-  `
-    .replace(/\n\s{4}/g, '\n')
-    .concat('\n');
+  const sshConfig = mustache.render(sshConfigTemplate, {
+    email,
+    host,
+    useKeychain,
+    workspace
+  });
 
   await createFile(workspace.sshConfig, sshConfig);
 
   // Create gitconfig for the workspace
-  const gitConfig = `
-    # Config for GIT account ${email}
-    [user]
-      name = ${name.value}
-      email = ${email}
-    [core]
-      sshCommand = ssh -F ${workspace.sshConfig}
-    ${
-      !signYourWork
-        ? ''
-        : `
-    [gpg]
-      format = ssh
-    [commit]
-      gpgsign = true
-    [push]
-      gpgsign = if-asked
-    [tag]
-      gpgsign = true
-    [user]
-      signingkey = ${workspace.privateKey}
-    `
-    }
-  `
-    .replace(/\n\s{4}/g, '\n')
-    .concat('\n');
+  const gitConfig = mustache.render(gitConfigTemplate, {
+    name,
+    email,
+    workspace,
+    signYourWork
+  });
 
   await createFile(workspace.gitConfig, gitConfig);
 

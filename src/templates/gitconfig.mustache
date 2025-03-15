@@ -1,0 +1,18 @@
+# Config for GIT account {{{email}}}
+[user]
+    name = {{{name.value}}}
+    email = {{{email}}}
+[core]
+    sshCommand = ssh -F {{{workspace.sshConfig}}}
+{{#signYourWork}}
+[gpg]
+    format = ssh
+[commit]
+    gpgsign = true
+[push]
+    gpgsign = if-asked
+[tag]
+    gpgsign = true
+[user]
+    signingkey = {{{workspace.privateKey}}}
+{{/signYourWork}}

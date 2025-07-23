@@ -1,27 +1,21 @@
 {
   "name": "@savaryna/git-add-account",
   "version": "2.1.0",
-  "description": "🔐 A small CLI app that allows you to easily add multiple GIT accounts on one machine. It switches between accounts automatically based on the workspace (directory/subdirectory) you are in.",
+  "description": "🔐 A small CLI app that allows you to easily add multiple Git accounts on one machine. It switches between accounts automatically based on the workspace you are in.",
   "homepage": "https://github.com/savaryna/git-add-account#readme",
   "keywords": [
-    "add",
-    "multiple",
     "git",
-    "github",
-    "account",
-    "accounts",
-    "users",
-    "on",
-    "one",
-    "machine",
-    "mac",
-    "linux",
-    "windows",
+    "multiple-accounts",
+    "account-switching",
+    "cli",
     "ssh",
-    "verified",
-    "commit",
-    "auto",
-    "switch"
+    "git-config",
+    "workspace",
+    "developer-tools",
+    "automation",
+    "productivity",
+    "github",
+    "gitlab"
   ],
   "author": "Alex Tofan",
   "license": "MIT",
@@ -48,18 +42,19 @@
     "pretest": "npm run build",
     "test": "npm publish --dry-run"
   },
-  "source": "src/index.ts",
   "main": "bin/main.js",
   "dependencies": {
     "mustache": "^4.2.0",
     "prompts": "^2.4.2",
-    "zod": "^3.20.6"
+    "yargs": "^18.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@types/mustache": "^4.2.5",
-    "@types/node": "^22.5.2",
+    "@types/node": "^22.16.5",
     "@types/prompts": "^2.4.2",
+    "@types/yargs": "^17.0.33",
     "tsup": "^8.2.4",
     "typescript": "^5.5.4"
   }

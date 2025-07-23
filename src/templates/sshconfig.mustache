@@ -1,8 +1,8 @@
-# Config for GIT account {{{email}}}
-Host {{{host.value}}}
-    HostName {{{host.value}}}
+# Config for GIT account {{{configDetails.email}}}
+Host {{{configDetails.host}}}
+    IgnoreUnknown AddKeysToAgent
+    HostName {{{configDetails.host}}}
     User git
-    AddKeysToAgent yes{{#useKeychain}}
-    UseKeychain yes{{/useKeychain}}
+    AddKeysToAgent yes
     IdentitiesOnly yes
-    IdentityFile {{{workspace.privateKey}}}
+    IdentityFile {{{paths.privateKey}}}

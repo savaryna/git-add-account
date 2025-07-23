@@ -1,4 +1,4 @@
-import { ZodTypeAny } from 'zod';
+import type { ZodTypeAny } from 'zod';
 
 const validate =
   <T extends ZodTypeAny>(schema: T) =>

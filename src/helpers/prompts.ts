@@ -1,8 +1,8 @@
-import { PathLike } from 'fs';
+import type { PathLike } from 'node:fs';
+import defaultPrompts from 'prompts';
 import exec from './exec';
 import { home, resolve } from './file';
 import validate, { z } from './validate';
-import defaultPrompts from 'prompts';
 
 type Name = {
   value: string;
@@ -25,18 +25,23 @@ type Workspace = {
 
 export const MIN_GIT_VERSION = '2.34.0'; // Lower versions don't support SSH for GPG signing
 
-export const getGitVersion = () => exec('git --version').then(({ stdout }) => stdout.split(' ')[2]);
+export const getGitVersion = () =>
+  exec('git --version').then(({ stdout }) => stdout.split(' ')[2]);
 
 export const exit = (code = 0, reason = null) => {
   console.log(reason ? `\n${reason}\n` : '');
-  console.log(`${code ? '😵 Exited.' : '✨ Done.'} Thanks for using @savaryna/git-add-account!\n`);
+  console.log(
+    `${code ? '😵 Exited.' : '✨ Done.'} Thanks for using @savaryna/git-add-account!\n`,
+  );
   process.exit(code);
 };
 
 // Add onCancel handler for all prompts
 export const prompts = <T extends string = string>(
-  questions: defaultPrompts.PromptObject<T> | Array<defaultPrompts.PromptObject<T>>,
-  options?: defaultPrompts.Options
+  questions:
+    | defaultPrompts.PromptObject<T>
+    | Array<defaultPrompts.PromptObject<T>>,
+  options?: defaultPrompts.Options,
 ) => defaultPrompts(questions, { onCancel: () => exit(1), ...options });
 
 export const overwritePathPrompt = (path: PathLike) =>
@@ -79,8 +84,8 @@ export default async () => {
       validate: validate(
         z
           .string()
-          .transform((h) => 'https://' + h)
-          .refine(URL.canParse, { message: 'Invalid host' })
+          .transform((h) => `https://${h}`)
+          .refine(URL.canParse, { message: 'Invalid host' }),
       ),
       format: (value): Host => ({
         value,
@@ -92,7 +97,11 @@ export default async () => {
       name: 'workspace',
       message: 'Workspace to use for this account:',
       initial: (host) => resolve(home(), 'code', host.camel),
-      validate: validate(z.string().refine((value) => !value.startsWith('~'), { message: '"~" is not supported' })),
+      validate: validate(
+        z.string().refine((value) => !value.startsWith('~'), {
+          message: '"~" is not supported',
+        }),
+      ),
       format: (value, { host }): Workspace => {
         const root = resolve(home(), value);
         const config = resolve(root, '.config');
@@ -104,7 +113,7 @@ export default async () => {
           gitConfig: resolve(config, 'gitconfig'),
           sshConfig: resolve(config, 'sshconfig'),
           privateKey: resolve(config, sshKeyFileName),
-          publicKey: resolve(config, sshKeyFileName + '.pub'),
+          publicKey: resolve(config, `${sshKeyFileName}.pub`),
         };
       },
     },

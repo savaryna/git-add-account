@@ -43,6 +43,7 @@
   "scripts": {
     "link": "npm unlink -g && npm link",
     "dev": "tsup --watch",
+    "check": "biome check --write",
     "build": "tsup",
     "pretest": "npm run build",
     "test": "npm publish --dry-run"
@@ -55,6 +56,7 @@
     "zod": "^3.20.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.1.2",
     "@types/mustache": "^4.2.5",
     "@types/node": "^22.5.2",
     "@types/prompts": "^2.4.2",

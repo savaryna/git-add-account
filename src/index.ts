@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 
 import mustache from 'mustache';
-
-import sshConfigTemplate from './templates/sshconfig.mustache';
-import gitConfigTemplate from './templates/gitconfig.mustache';
-
 import exec from './helpers/exec';
-import { createFile, hasReadWriteAccess, platform, mkdir, readFile, remove } from './helpers/file';
-import prompts, { overwritePathPrompt, exit } from './helpers/prompts';
+import {
+  createFile,
+  hasReadWriteAccess,
+  mkdir,
+  platform,
+  readFile,
+  remove,
+} from './helpers/file';
+import prompts, { exit, overwritePathPrompt } from './helpers/prompts';
+import gitConfigTemplate from './templates/gitconfig.mustache';
+import sshConfigTemplate from './templates/sshconfig.mustache';
 
 async function main() {
   const { name, email, host, workspace, signYourWork } = await prompts();
@@ -30,10 +35,12 @@ async function main() {
   await exec(`ssh-keygen -t ed25519 -C "${email}" -f ${workspace.privateKey}`);
 
   // Use keychain if the system is MacOS and a passphrase was used
-  const useKeychain = await exec(`ssh-keygen -y -P "" -f ${workspace.privateKey}`)
+  const useKeychain = await exec(
+    `ssh-keygen -y -P "" -f ${workspace.privateKey}`,
+  )
     .then(
       () => false,
-      () => true
+      () => true,
     )
     .then((hasPassphrase) => hasPassphrase && platform() === 'darwin');
 
@@ -42,7 +49,7 @@ async function main() {
     email,
     host,
     useKeychain,
-    workspace
+    workspace,
   });
 
   await createFile(workspace.sshConfig, sshConfig);
@@ -52,15 +59,19 @@ async function main() {
     name,
     email,
     workspace,
-    signYourWork
+    signYourWork,
   });
 
   await createFile(workspace.gitConfig, gitConfig);
 
   // Include workspace config in the global config
-  await exec(`git config --global includeIf.gitdir:${workspace.root}/.path ${workspace.gitConfig}`);
+  await exec(
+    `git config --global includeIf.gitdir:${workspace.root}/.path ${workspace.gitConfig}`,
+  );
 
-  const publicKey = await readFile(workspace.publicKey).then((buffer) => buffer.toString().trim());
+  const publicKey = await readFile(workspace.publicKey).then((buffer) =>
+    buffer.toString().trim(),
+  );
 
   console.log('\nYour public SSH key is:\n', publicKey);
   console.log('You can also find it here:\n', workspace.publicKey);

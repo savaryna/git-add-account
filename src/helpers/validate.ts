@@ -1,12 +1,9 @@
 import type { ZodTypeAny } from 'zod';
 
-const validate =
-  <T extends ZodTypeAny>(schema: T) =>
-  (value: unknown) => {
-    const { success, error } = schema.safeParse(value);
-    if (!success) return error.format()._errors[0];
-    return true;
-  };
+const validate = (schema: ZodTypeAny, data: unknown) => {
+  const { success, error } = schema.safeParse(data);
+  return !success && error.errors.map(({ message }) => message).join('\n');
+};
 
 export { z } from 'zod';
 export default validate;

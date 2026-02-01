@@ -2,6 +2,16 @@
 
 🔐 A small CLI app that allows you to easily add multiple Git accounts on one machine. It switches between accounts automatically based on the workspace you are in.
 
+## Agent usage (skill)
+
+Add the skill using
+
+```shell
+npx skills add savaryna/git-add-account
+```
+
+and ask your agent to "add a new git account".
+
 ## CLI usage
 
 Run the command direcly with

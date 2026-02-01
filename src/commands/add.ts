@@ -10,10 +10,36 @@ export default {
   command: ['$0', 'add'],
   describe: 'Add a new Git account',
   builder: (y) =>
-    y.option('dry-run', {
-      type: 'boolean',
-      describe: 'Preview the generated config files without writing them to disk',
-    }),
+    y
+      .option('name', {
+        type: 'string',
+        describe: 'Full name for Git commits (e.g., John Doe)',
+      })
+      .option('email', {
+        type: 'string',
+        describe: 'Email for this Git account',
+      })
+      .option('host', {
+        type: 'string',
+        describe: 'Git provider host (e.g., github.com, gitlab.com)',
+      })
+      .option('workspace', {
+        type: 'string',
+        describe: 'Absolute path to the workspace for this account',
+      })
+      .option('signYourWork', {
+        type: 'boolean',
+        describe: 'Sign commits and tags with your SSH key',
+        default: true,
+      })
+      .option('non-interactive', {
+        type: 'boolean',
+        describe: 'Run in non-interactive mode, all required options must be provided',
+      })
+      .option('dry-run', {
+        type: 'boolean',
+        describe: 'Preview the generated config files without writing them to disk',
+      }),
   handler: async (args) => {
     console.log("Let's add a new Git account.");
 
@@ -59,6 +85,13 @@ export default {
         throw new Error('Operation cancelled by the user.');
       },
     };
+
+    if (args?.nonInteractive) {
+      const errors = validate(ConfigDetails, args);
+      if (errors) throw new Error(errors);
+    }
+
+    prompts.override(args);
 
     const configDetails = (await prompts(questions, options)) as ConfigDetails;
     const configs = await getConfigs(configDetails);

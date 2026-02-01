@@ -6,7 +6,7 @@ import commands from '@/commands';
 
 yargs(hideBin(process.argv))
   .scriptName('git-add-account')
-  .usage('$0 [cmd] <options>')
+  .usage('$0 <command> [options]')
   .command(commands)
   .demandCommand(0, 1)
   .help('h')

@@ -36,6 +36,11 @@ gaa
 
 For usage and command details run it with the `--help` option.
 
+The `add` command also supports these options:
+
+- `--non-interactive` runs without prompts. Provide all required options.
+- `--dry-run` previews the config files without writing them to disk.
+
 After going through all the steps, you will be presented with your public SSH key so you can copy, and add it to your Git provider. For example GitHub[^1]:
 
 1. Copy the public SSH key.
